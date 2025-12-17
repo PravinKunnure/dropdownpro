@@ -1,17 +1,13 @@
-<<<<<<< HEAD
 # dropdownpro
 A customisable dropdown overlay package for Flutter.
 =======
 # DropdownPro
 
 A **customizable dropdown overlay package for Flutter**.  
-Supports search, API pagination, and multi-selection (basic version included).
 
 ## Features
 
 - Customizable dropdown overlay
-- Supports search and API calls
-- Supports multi-selection for products
 - Easy to integrate in any Flutter app
 
 ## Installation
@@ -38,4 +34,3 @@ HSFlowDropdownBasic(
     print("Selected: $value");
   },
 );
->>>>>>> 92f1de3 (Initial dev release v0.0.1-dev.1)
