@@ -1,4 +1,4 @@
-import 'package:dropdownpro/dropdownpro.dart';
+import 'package:dropdownproplus/dropdownpro.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -24,12 +24,12 @@ class ExamplePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("HSFlow Dropdown Example")),
+      appBar: AppBar(title: const Text("Example")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            DropdownPro(
+            DropdownProPlus(
               label: "Select Fruit",
               items: ["Apple", "Banana", "Orange", "Mango"],
               onItemSelected: (value) {

@@ -1,8 +1,8 @@
-name: dropdownpro
-description: "A customizable dropdown overlay package for Flutter. #dropdown #dropdownpro"
+name: dropdownproplus
+description: "A customizable dropdown overlay package for Flutter. #dropdown #dropdownproplus"
 version: 0.0.1-dev.1
-homepage: https://github.com/PravinKunnure/dropdownpro
-repository: https://github.com/PravinKunnure/dropdownpro
+homepage: https://github.com/PravinKunnure/dropdownproplus
+repository: https://github.com/PravinKunnure/dropdownproplus
 
 environment:
   sdk: ">=3.10.3 <4.0.0"

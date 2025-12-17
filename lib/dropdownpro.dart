@@ -2,13 +2,13 @@ library;
 
 import 'package:flutter/material.dart';
 
-class DropdownPro extends StatefulWidget {
+class DropdownProPlus extends StatefulWidget {
   final String label;
   final bool isEnabled;
   final List<String> items;
   final Function(String) onItemSelected;
 
-  const DropdownPro({
+  const DropdownProPlus({
     super.key,
     this.label = "",
     this.isEnabled = true,
@@ -17,10 +17,10 @@ class DropdownPro extends StatefulWidget {
   });
 
   @override
-  State<DropdownPro> createState() => _DropdownProState();
+  State<DropdownProPlus> createState() => _DropdownProPlusState();
 }
 
-class _DropdownProState extends State<DropdownPro>
+class _DropdownProPlusState extends State<DropdownProPlus>
     with SingleTickerProviderStateMixin {
   final LayerLink _layerLink = LayerLink();
   OverlayEntry? _overlayEntry;
