@@ -8,7 +8,7 @@ class DDHighlighter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.black.withOpacity(0.2);
+    final paint = Paint()..color = Colors.black.withValues(alpha: 0.2);
 
     final path = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
 

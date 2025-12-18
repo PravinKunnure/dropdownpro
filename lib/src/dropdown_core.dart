@@ -189,7 +189,6 @@ class _DropdownPlusState extends State<DropdownPlus>
                           elevation: 0,
                           color: Colors.transparent,
                           child: _DropdownContent(
-                            keyU: UniqueKey(),
                             toggleDD: (val) {
                               setState(() {
                                 dropdownSelectedItem = val;
@@ -237,7 +236,6 @@ class _DropdownPlusState extends State<DropdownPlus>
 ///---------DropDown Widget And Operations
 class _DropdownContent extends StatefulWidget {
   final dynamic widget;
-  final keyU;
   final double maxHeight;
   final Function(dynamic) toggleDD;
 
@@ -245,7 +243,6 @@ class _DropdownContent extends StatefulWidget {
     required this.widget,
     required this.maxHeight,
     required this.toggleDD,
-    this.keyU,
   });
 
   @override
@@ -434,7 +431,7 @@ class _DropdownContentState extends State<_DropdownContent> {
   }
 
   /// -------- FETCH API ITEMS CLEANLY --------
-  Future<void> _fetchItems({String filter = ""}) async {
+  Future<void> _fetchItems() async {
     if (isLoading || !hasMore) return;
 
     setState(() {
