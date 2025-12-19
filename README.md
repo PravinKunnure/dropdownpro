@@ -2,32 +2,28 @@
 
 A customizable dropdown overlay package for Flutter.
 
-## Features
+# Features
 - Customizable dropdown overlay
 - Clean and simple API
 - Easy to integrate into any Flutter app
 
-## Installation
+# Installation
 
 Add this to your pubspec.yaml:
 
 dependencies:
-dropdownproplus:
-git:
-url: https://github.com/yourusername/dropdownpro.git
-ref: main
+dropdownproplus: ^0.1.1
 
-Run:
+#Run:
 flutter pub get
 
 ## Usage
-
 Import:
 
 import 'package:flutter/material.dart';
 import 'package:dropdownproplus/dropdownproplus.dart';
 
-Example:
+## Example:
 import 'package:dropdownproplus/dropdownproplus.dart';
 import 'package:flutter/material.dart';
 
@@ -61,12 +57,15 @@ child: Column(
 children: [
 DropdownPlus(
 dropdownLabel: "Fruits",
-onItemSelected:  (value) {
+onItemSelected: (value) {
 ScaffoldMessenger.of(
 context,
 ).showSnackBar(SnackBar(content: Text("Selected: $value")));
 },
-dropdownItems: ["Apple", "Banana", "Orange", "Mango"])
+dropdownItems: ["Apple", "Banana", "Orange", "Mango"],
+value: '', ///Selected Value For Customised Items or for JSON/POJO class object return
+callBackKey: '', ///To Access Tapped Details Of Dropdown item.
+),
 ],
 ),
 ),
@@ -83,3 +82,4 @@ onItemSelected  : Callback when an item is selected
 
 ## License
 MIT License
+

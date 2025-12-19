@@ -4,6 +4,7 @@ import 'package:dropdownproplus/src/helper_widgets.dart';
 import 'package:flutter/material.dart';
 
 class DropdownPlus extends StatefulWidget {
+  final dynamic value;
   final String dropdownLabel;
   final bool isMandatory;
   final bool isEnabled;
@@ -11,28 +12,31 @@ class DropdownPlus extends StatefulWidget {
   final bool enableSearchBar;
   final String callBackKey;
   final dynamic dropdownItems;
-  final dynamic defaultItem;
   final bool enableMultiSelect;
   final bool customItemWidget;
+  final int skip;
   final Function(dynamic) onItemSelected;
-  final Function(dynamic, StateSetter)? onLoadMore;
-  final Function(dynamic, dynamic)? funCustomWidget;
+  // final Function(dynamic,StateSetter,bool,bool,bool,int)? onLoadMore;
+  final Function(dynamic)? onLoadMore;
+  final Function(dynamic,dynamic)? funCustomWidget;
+
 
   const DropdownPlus({
     super.key,
+    required this.value,
     this.dropdownLabel = '',
     this.isMandatory = false,
-    this.enableSearchBar = false,
+    this.enableSearchBar=false,
     required this.onItemSelected,
-    this.callBackKey = '',
+    required this.callBackKey,
     required this.dropdownItems,
-    this.defaultItem,
-    this.isEnabled = true,
-    this.applyPagination = false,
-    this.enableMultiSelect = false,
-    this.customItemWidget = false,
+    this.isEnabled = false,
+    this.applyPagination=false,
+    this.enableMultiSelect=false,
+    this.customItemWidget=false,
     this.funCustomWidget,
     this.onLoadMore,
+    this.skip=1,
   });
 
   @override
@@ -54,8 +58,8 @@ class _DropdownPlusState extends State<DropdownPlus>
   @override
   void initState() {
     super.initState();
-    dropdownSearchController.text = '';
-    dropdownSelectedItem = widget.defaultItem ?? '';
+    dropdownSearchController.text='';
+    dropdownSelectedItem = widget.value ?? '';
 
     _animationController = AnimationController(
       vsync: this,
@@ -91,32 +95,27 @@ class _DropdownPlusState extends State<DropdownPlus>
         isOpen = true;
       });
     }
-
     FocusScope.of(context).unfocus();
   }
 
   OverlayEntry _createOverlayEntry() {
-    List<dynamic> dropDownItems = [];
-
-    final RenderBox renderBox =
-        globalKey.currentContext!.findRenderObject() as RenderBox;
+    List<dynamic> dropDownItems=[];
+    final RenderBox renderBox = globalKey.currentContext!.findRenderObject() as RenderBox;
     final Size fieldSize = renderBox.size;
     final Offset fieldOffset = renderBox.localToGlobal(Offset.zero);
-
     final Rect sectionRect = Rect.fromLTWH(
       fieldOffset.dx,
-      fieldOffset.dy + 20,
+      fieldOffset.dy+20,
       fieldSize.width,
-      fieldSize.height - 20,
+      fieldSize.height-20,
     );
-
     return OverlayEntry(
       builder: (context) {
         return Material(
-          // color: Colors.blueGrey.shade900.withValues(alpha: 0.5),
           color: Colors.transparent,
           child: Stack(
             children: [
+
               Positioned.fill(
                 child: GestureDetector(
                   onTap: _toggleDropdown,
@@ -128,81 +127,64 @@ class _DropdownPlusState extends State<DropdownPlus>
               ),
 
               StatefulBuilder(
-                builder: (context, setState_) {
-                  double itemHeight = 300;
-                  if (widget.dropdownItems is Future) {
-                    Future.value(widget.dropdownItems).then((value) {
-                      dropDownItems = value as List;
-                    });
-                    setState_(() {
-                      itemHeight = 350;
-                    });
-                  } else {
-                    dropDownItems = widget.dropdownItems ?? [];
-                    itemHeight = widget.enableSearchBar
-                        ? 320
-                        : dropDownItems.length <= 2
-                        ? 100
-                        : dropDownItems.length <= 4
-                        ? 170
-                        : dropDownItems.length <= 6
-                        ? 250
-                        : 350; // Adjust per item widget
-                  }
+                  builder:(context, setState_) {
+                    double itemHeight = 300;
+                    if(widget.dropdownItems is Future){
+                      Future.value(widget.dropdownItems).then((value) {
+                        dropDownItems=value as List;
+                      },);
+                      setState_(() {
+                        itemHeight = 350;
+                      });
+                    }else{
+                      dropDownItems = widget.dropdownItems ?? [];
+                      itemHeight = widget.enableSearchBar?320:dropDownItems.length<=2?100:dropDownItems.length<=4?170:dropDownItems.length<=6?250:350; // Adjust per item widget
+                    }
 
-                  final Size screenSize = MediaQuery.of(context).size;
-                  final keyboardHeight = MediaQuery.of(
-                    context,
-                  ).viewInsets.bottom;
-                  //final double itemHeight = MediaQuery.heightOf(context)/2;
-                  final double spaceBelow =
-                      screenSize.height - (fieldOffset.dy + fieldSize.height);
-                  final double spaceAbove = fieldOffset.dy;
-                  final bool showAbove =
-                      spaceBelow < itemHeight && spaceAbove > spaceBelow;
-                  final double maxAvailableHeight = showAbove
-                      ? spaceAbove
-                      : spaceBelow;
-                  final double overlayHeight = itemHeight < maxAvailableHeight
-                      ? itemHeight + keyboardHeight
-                      : maxAvailableHeight + keyboardHeight;
+                    final Size screenSize = MediaQuery.of(context).size;
+                    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
-                  final double dx = 0; // adjust if needed horizontally
-                  final double dy = showAbove
-                      ? -overlayHeight
-                      : fieldSize.height;
+                    final double spaceBelow = screenSize.height - (fieldOffset.dy + fieldSize.height);
+                    final double spaceAbove = fieldOffset.dy;
+                    final bool showAbove = spaceBelow < itemHeight && spaceAbove > spaceBelow;
+                    final double maxAvailableHeight = showAbove ? spaceAbove : spaceBelow;
+                    final double overlayHeight = itemHeight < maxAvailableHeight ? itemHeight+keyboardHeight : maxAvailableHeight+keyboardHeight;
+                    final double dx = 0;
+                    final double dy = showAbove ? - overlayHeight : fieldSize.height;
 
-                  return CompositedTransformFollower(
-                    link: _layerLink,
-                    showWhenUnlinked: false,
-                    offset: Offset(dx, dy),
-                    child: SizeTransition(
-                      sizeFactor: _expandAnimation,
-                      axisAlignment: -1,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: overlayHeight,
-                          minWidth: renderBox.size.width,
-                          maxWidth: renderBox.size.width,
-                        ),
-                        child: Material(
-                          elevation: 0,
-                          color: Colors.transparent,
-                          child: _DropdownContent(
-                            toggleDD: (val) {
-                              setState(() {
-                                dropdownSelectedItem = val;
-                              });
-                              _toggleDropdown();
-                            },
-                            widget: widget,
+                    return CompositedTransformFollower(
+                      link: _layerLink,
+                      showWhenUnlinked: false,
+                      offset: Offset(dx, dy),
+                      child: SizeTransition(
+                        sizeFactor: _expandAnimation,
+                        axisAlignment: -1,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
                             maxHeight: overlayHeight,
+                            minWidth: renderBox.size.width,
+                            maxWidth: renderBox.size.width,
+                          ),
+                          child: Material(
+                            elevation: 0,
+                            color: Colors.transparent,
+                            child: _DropdownContent(
+                              keyU: UniqueKey(),
+                              toggleDD: (val) {
+                                if(!widget.customItemWidget){
+                                  setState(() {
+                                    dropdownSelectedItem=val;
+                                  });
+                                }
+                                _toggleDropdown();
+                              },
+                              widget: widget,
+                              maxHeight: overlayHeight,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );}
               ),
             ],
           ),
@@ -236,65 +218,54 @@ class _DropdownPlusState extends State<DropdownPlus>
 ///---------DropDown Widget And Operations
 class _DropdownContent extends StatefulWidget {
   final dynamic widget;
+  final keyU;
   final double maxHeight;
   final Function(dynamic) toggleDD;
 
   const _DropdownContent({
     required this.widget,
     required this.maxHeight,
-    required this.toggleDD,
+    required this.toggleDD, this.keyU,
   });
 
   @override
   State<_DropdownContent> createState() => _DropdownContentState();
 }
-
 class _DropdownContentState extends State<_DropdownContent> {
   final ScrollController controller = ScrollController();
-
   List<dynamic> items = [];
   List<dynamic> itemsKeepForSearchOp = [];
-
   bool isLoading = false;
   bool hasMore = true;
-  bool isAPICall = false;
-  int skip = 0;
+  bool isAPICall=false;
+  int skip = 1;
 
   @override
   void initState() {
     super.initState();
-
+    skip=widget.widget.skip;
     controller.addListener(() {
-      if (controller.position.pixels >=
-              controller.position.maxScrollExtent - 80 &&
+      if (controller.position.pixels >= controller.position.maxScrollExtent - 80 &&
           !isLoading &&
           hasMore &&
           widget.widget.applyPagination) {
         _fetchItems();
-        // widget.widget.onLoadMore();
       }
     });
-
-    if (widget.widget.dropdownItems is Future) {
+    if(widget.widget.dropdownItems is Future){
       Future.value(widget.widget.dropdownItems).then((value) {
         items = value as List;
-        itemsKeepForSearchOp = items;
+        itemsKeepForSearchOp= items;
         setState(() {});
-        // setState(() {
-        //   widget.maxHeight = widget.widget.enableSearchBar?320:items.length<=2?100:items.length<=4?170:items.length<=6?250:350; // Adjust per item widget
-        // });
-      });
-    } else {
+      },);
+    }else{
       items = widget.widget.dropdownItems;
-      itemsKeepForSearchOp = items;
+      itemsKeepForSearchOp =items;
     }
   }
-
   /// -------- UI BUILDER --------
   @override
   Widget build(BuildContext context) {
-    //print("SEARCH_VALUE --123> $itemsSearchKeep");
-
     return Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: EdgeInsets.zero,
@@ -303,118 +274,84 @@ class _DropdownContentState extends State<_DropdownContent> {
           color: Colors.grey.shade100,
           elevation: 0,
           child: SizedBox(
-            height: widget.maxHeight - 10,
+            height: widget.maxHeight-10,
             child: Column(
               children: [
-                // if ((items.length >= 5 || isSearchDone) && widget.widget.isSearchBarRequired)
                 if (widget.widget.enableSearchBar)
                   dropdownSearchBar(
-                    widget.widget.enableSearchBar,
-                    widget.widget.dropdownLabel,
-                    (searchedValue) {
-                      if (searchedValue.isNotEmpty &&
-                          searchedValue.length >= 3) {
-                        List<dynamic> tempItems = [];
-                        // print("SEARCH_ITEMS -items-> $items");
-
-                        for (var itm in items) {
-                          String prodName = itm.toString().toLowerCase();
-                          String sVal = searchedValue.toString().toLowerCase();
-
-                          if (prodName.toLowerCase().contains(sVal) ||
-                              prodName.startsWith(sVal) ||
-                              prodName == sVal) {
-                            tempItems.add(itm);
-                          }
+                    widget.widget.enableSearchBar, widget.widget.dropdownLabel, (searchedValue) {
+                    if(searchedValue.isNotEmpty && searchedValue.length>=3){
+                      List<dynamic> tempItems = [];
+                      for(var itm in items){
+                        String prodName = itm.toString().toLowerCase();
+                        String sVal = searchedValue.toString().toLowerCase();
+                        if(prodName.toLowerCase().contains(sVal) || prodName.startsWith(sVal) || prodName==sVal){
+                          tempItems.add(itm);
                         }
-                        setState(() {
-                          if (tempItems.isNotEmpty) {
-                            items = tempItems;
-                          }
-                        });
                       }
-                    },
-                    (value) {
                       setState(() {
-                        items = itemsKeepForSearchOp;
+                        if(tempItems.isNotEmpty){
+                          items=tempItems;
+                        }
                       });
-                    },
+                    }
+                  }, (value) {
+                    setState(() {
+                      items=itemsKeepForSearchOp;
+                    });
+                  },
                   ),
-
-                // items.isEmpty && isSearchDone?
-                // Text("Not found")
-                //     :
                 Expanded(
                   child:
-                      //isAPICall?Center(child: appCircularIndicator,) :
-                      ListView.builder(
-                        controller: controller,
-                        padding: const EdgeInsets.all(5),
-                        itemCount: items.length,
-                        itemBuilder: (context, index) {
-                          return widget.widget.enableMultiSelect
-                              ?
-                                ///If Type Is Product - For Filter Case Only
-                                InkWell(
-                                  onTap: () {},
-                                  child: Card(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons
-                                                .check_box_outline_blank_rounded,
-                                            color: Colors.pinkAccent,
-                                            size: 20,
-                                          ),
-                                          SizedBox(width: 5),
-                                          Expanded(
-                                            child: Text(
-                                              items[index] ?? '-',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              : InkWell(
-                                  onTap: () {
-                                    widget.widget.onItemSelected({
-                                      widget.widget.callBackKey:
-                                          '${items[index]}',
-                                      'tapped_index': index,
-                                    });
-                                    widget.toggleDD('${items[index]}');
-                                  },
+                  ListView.builder(
+                    controller: controller,
+                    padding: const EdgeInsets.all(5),
+                    itemCount: items.length + (hasMore && widget.widget.applyPagination ? 1 : 0),
+                    itemBuilder: (context, index) {
 
-                                  child: Card(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8),
-                                      child: widget.widget.customItemWidget
-                                          ? widget.widget.funCustomWidget(
-                                              index,
-                                              items,
-                                            )
-                                          : Text(
-                                              '${items[index]}',
-                                              style: TextStyle(
-                                                color: Colors.black,
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-                                );
+                      if (index == items.length && widget.widget.applyPagination) {
+                        return hasMore
+                            ? Center(child: SizedBox(height: 35,width: 35,child: CircularProgressIndicator()))
+                            : const SizedBox.shrink();
+                      }
+
+                      return  widget.widget.enableMultiSelect? ///If Type Is Product - For Filter Case Only
+                      InkWell(
+                        onTap: () {},
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.check_box_outline_blank_rounded,
+                                  color: Colors.pinkAccent,
+                                  size: 20,
+                                ),
+                                SizedBox(width: 5),
+                                Expanded(
+                                  child: Text(items[index]??'-',style:TextStyle(color:Colors.black,fontSize: 11,fontWeight: FontWeight.w500),),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      )
+                          :InkWell(
+                        onTap: () {
+                          widget.widget.onItemSelected({widget.widget.callBackKey:'${items[index]}','tapped_index':index,'items':items});
+                          widget.toggleDD('${items[index]}');
                         },
-                      ),
+
+                        child: Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: widget.widget.customItemWidget?widget.widget.funCustomWidget(index,items):Text('${items[index]}',style:TextStyle(color:Colors.black,fontSize: 11,fontWeight: FontWeight.w500),),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -436,19 +373,24 @@ class _DropdownContentState extends State<_DropdownContent> {
 
     setState(() {
       isLoading = true;
-      isAPICall = true;
     });
 
-    widget.widget.onLoadMore({'skip': skip, 'items_list': items}, setState);
+    final List newData = await widget.widget.onLoadMore!(skip);
+
+    if (!mounted) return;
+
+    setState(() {
+      items.addAll(newData);
+      itemsKeepForSearchOp = items;
+      skip+=1;
+      isLoading = false;
+
+      if (newData.length < 20) {
+        hasMore = false;
+      }
+    });
   }
+
 }
 
-///-- String Extension To Capitalise The First Letter Of String
-extension StringExtension on String {
-  String capitalize() {
-    if (isEmpty) {
-      return '';
-    }
-    return "${this[0].toUpperCase()}${substring(1)}";
-  }
-}
+

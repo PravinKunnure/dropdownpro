@@ -37,6 +37,8 @@ class ExamplePage extends StatelessWidget {
                 ).showSnackBar(SnackBar(content: Text("Selected: $value")));
               },
               dropdownItems: ["Apple", "Banana", "Orange", "Mango"],
+              value: '', ///Selected Value For Customised Items or for JSON/POJO class object return
+              callBackKey: '', ///To Access Tapped Details Of Dropdown item.
             ),
           ],
         ),

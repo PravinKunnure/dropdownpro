@@ -12,3 +12,11 @@
 - Overlay dropdown on text field click.
 - UI modifications and functionality enhancement
 - Pagination part is under development
+
+
+## [0.1.1]
+### Added
+- UI modifications and functionality enhancement
+- Pagination development is done
+- Now you can customise the dropdown item as per your requirement
+- Customisation can be done 
